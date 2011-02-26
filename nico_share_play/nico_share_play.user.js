@@ -6,6 +6,7 @@
 // ==/UserScript==
 // http://gigaschema.appspot.com/help
 (function() {
+    // http://gigaschema.appspot.com/azuciao/playshare
     var USER_NAME = "azuciao",
             SCHEME_NAME = "playshare";
     var isPlaying = GM_getValue("shareplay") || false;
@@ -51,7 +52,7 @@
     }, false);
 
     function finishSubmit(result) {
-        log(result);
+        // log(result);
     }
 
     function toggleSwitch() {
