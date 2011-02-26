@@ -243,6 +243,7 @@
                             grid(
                                     text("Prefix:", 'defaultTag', "Now browsing: ", { size: 20 }), '\n',
                                     checkbox("Use selection quote", 'isSelection', true), '\n',
+                                    checkbox("remove utm_* parameter", 'removeUtm', false), '\n',
                                     checkbox("Post with Ctrl+Enter", 'PostWithCtrl', false), '\n',
                                     text("ShortcutKey:", 'ShortCutKey', "CS-Enter", { size: 16 })
                                     )
@@ -836,16 +837,19 @@
             Config.open();
             return;
         }
-        var URL = document.location.href;
+        var normalURL = document.location.href;
         var title = (document.title) ? document.title : window.parent.document.title;
-        if (/(^http:\/\/reader\.livedoor\.com\/|^http:\/\/fastladder\.com\/reader\/)/.test(URL)) {
+        if (/(^http:\/\/reader\.livedoor\.com\/|^http:\/\/fastladder\.com\/reader\/)/.test(normalURL)) {
             var w = unsafeWindow;
             var item = w.get_active_item(true);
             var feed = w.get_active_feed();
-            URL = item.link;
+            normalURL = item.link;
             title = item.title + " - " + feed.channel.title;
         }
-        var receivedShortUrl = new makeShortURL(URL);// 初期化
+        if (GM_settings.removeUtm) {
+            normalURL = normalURL.replace(/([\?\&]utm_(source|medium|campaign|content)=.+)/ig, '');
+        }
+        var receivedShortUrl = new makeShortURL(normalURL);// 初期化
         receivedShortUrl.getShortURL(function(shortedURL) {
             var twitterNew = new postTwitter(shortedURL, title)
             twitterNew.make_message();
