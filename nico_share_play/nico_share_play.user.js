@@ -12,14 +12,18 @@
     if (isPlaying) {
         playMovie();
     } else {
-        var submitBt = document.createElement("a");
-        submitBt["textContent" || "innerText"] = "いいね!";
-        submitBt.addEventListener("click", submitToSever, false);
         var insertHere = document.getElementById("outside");
         insertHere.appendChild(submitBt);
+        var submitBt = document.createElement("a");
+        submitBt["textContent" || "innerText"] = "いいね!";
+        submitBt.addEventListener("click", function() {
+            insertHere.removeChild(submitBt);// 自爆する
+            submitToSever();
+        }, false);
+
     }
     if (typeof GM_registerMenuCommand !== 'undefined') {
-        GM_registerMenuCommand("Nico share play - トグル", function(){
+        GM_registerMenuCommand("Nico share play - トグル", function() {
             toggleSwitch();
             isPlaying ? playNext() : stopMovie();
         });
