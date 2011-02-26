@@ -8,8 +8,23 @@
 (function() {
     var USER_NAME = "azuciao",
             SCHEME_NAME = "playshare";
-
-    window.addEventListener('NicoSharePlay.save', function(ev) {
+    var isPlaying = GM_getValue("shareplay") || false;
+    if (isPlaying) {
+        playMovie();
+    } else {
+        var submitBt = document.createElement("a");
+        submitBt["textContent" || "innerText"] = "いいね!";
+        submitBt.addEventListener("click", submitToSever, false);
+        var insertHere = document.getElementById("outside");
+        insertHere.appendChild(submitBt);
+    }
+    if (typeof GM_registerMenuCommand !== 'undefined') {
+        GM_registerMenuCommand("Nico share play - トグル", function(){
+            toggleSwitch();
+            isPlaying ? playNext() : stopMovie();
+        });
+    }
+    window.addEventListener('NicoSharePlay.record', function(ev) {
         // eventを受け取り
         // JSON.parse(ev.data)してobjectに変換
         // containerからdispatchしておくと,
@@ -30,21 +45,27 @@
         // ev.targetから対象のDOM Elementも送り付けられる
         playNext();
     }, false);
-    var submitBt = document.createElement("a");
-    submitBt["textContent" || "innerText"] = "いいね!";
-    submitBt.addEventListener("click", submitToSever, false);
-    var insertHere = document.getElementById("outside");
-    insertHere.appendChild(submitBt);
+
     function finishSubmit(result) {
         log(result);
     }
-    function toggleSwitch(){
-        
-    }
-    function stopMovie(){
 
+    function toggleSwitch() {
+        isPlaying = isPlaying ? false : true;
+        saveStatus();
     }
+
+    function saveStatus() {
+        GM_setValue("shareplay", isPlaying);
+    }
+
+    function stopMovie() {
+        isPlaying = false;
+        saveStatus();
+    }
+
     function playMovie() {
+        if (!isPlaying) return;
         // console.log("wrapper is " + isWrapper);
         evalInPage(function(mode) {
             var player = document.getElementById("flvplayer");
@@ -92,6 +113,7 @@
 
 
     function playNext(vid) {
+        if (!isPlaying) return;
         if (vid) {
             location.href = "http://www.nicovideo.jp/watch/" + valueData.vid;
         } else {
@@ -116,7 +138,7 @@
             }
             // Web ページ
             var request = document.createEvent("MessageEvent");
-            request.initMessageEvent("NicoSharePlay.save", true, false,
+            request.initMessageEvent("NicoSharePlay.record", true, false,
                     JSON.stringify(send_data),
                     location.protocol + "//" + location.host,
                     "", window);
