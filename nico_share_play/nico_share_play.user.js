@@ -44,6 +44,9 @@
             + '    -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, .8);'
             + '    -moz-box-shadow: 0 0 8px rgba(0, 0, 0, .8);'
             + '}'
+            + 'ul.shareplayer li a.nonactive {'
+            + '    background : #DDD;'
+            + '}'
             + 'ul.shareplayer li a:after {'
             + '    content: "\00BB";'
             + '    padding-left: .5em;'
@@ -66,17 +69,21 @@
     status_li_stop_a["textContent" || "innerText"] = "STOP!"
     // Next , STOP イベント
     status_li_play_a.addEventListener("click", function() {
+        removeClassName(status_li_stop_a, "nonactive");
         startPlay()
     }, false);
     status_li_stop_a.addEventListener("click", function() {
+        addClassName(status_li_stop_a, "nonactive");
         stopMovie();
     }, false);
     status_li_play.appendChild(status_li_play_a);
     status_li_stop.appendChild(status_li_stop_a);
     // 登録ボタンの追加
     if (isPlaying) {
+        // addClassName(status_li_play_a, "nonactive");
         playMovie();
     } else {
+        addClassName(status_li_stop_a, "nonactive");
         var submit_li = document.createElement("li");
         var submit_a = document.createElement("a");
         submit_a["textContent" || "innerText"] = "いいね!"
@@ -133,6 +140,9 @@
     function stopMovie() {
         isPlaying = false;
         saveStatus();
+        evalInPage(function() {
+            clearInterval(window.sharePlayTImer);
+        }, []);
     }
 
     function playMovie() {
@@ -150,15 +160,15 @@
                         "", window);
                 document.dispatchEvent(request);
             }
-            var t = setInterval(function() {
+            window.sharePlayTImer = setInterval(function() {
                 var status = player.ext_getStatus();
                 var playhead = player.ext_getPlayheadTime();
                 if (status == "connectionError" || document.title == "Error?") {
-                    clearInterval(t);
+                    clearInterval(window.sharePlayTImer);
                     player.style.display = "none";
                     //controller.reload(true);
                 } else if (status == "end") {
-                    clearInterval(t);
+                    clearInterval(window.sharePlayTImer);
                     playNext();
                 }
                 if (mode == "mute") {
