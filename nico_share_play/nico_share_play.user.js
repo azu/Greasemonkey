@@ -3,7 +3,7 @@
 // @namespace      http://efcl.info/
 // @description    ニコニコ動画の動画をGIGA SCHEMAに登録してシャッフルプレイ
 // @include        http://www.nicovideo.jp/watch/*
-// @require        https://gist.github.com/raw/845920/58c23908b824e8f962f2739aaa90678e8153e3f2/nicovideo_createPanel.js
+// @require        https://gist.github.com/raw/845920/c9292901c242b8ff3b8bda362356dcd09de8cb5b/nicovideo_createPanel.js
 // ==/UserScript==
 // http://gigaschema.appspot.com/help
 (function() {
@@ -142,7 +142,7 @@
         saveStatus();
         evalInPage(function() {
             clearInterval(window.sharePlayTImer);
-        }, []);
+        });
     }
 
     function playMovie() {
@@ -160,7 +160,7 @@
                         "", window);
                 document.dispatchEvent(request);
             }
-            window.sharePlayTImer = setInterval(function() {
+            window.sharePlayTImer = window.setInterval(function() {
                 var status = player.ext_getStatus();
                 var playhead = player.ext_getPlayheadTime();
                 if (status == "connectionError" || document.title == "Error?") {
@@ -171,25 +171,23 @@
                     clearInterval(window.sharePlayTImer);
                     playNext();
                 }
-                if (mode == "mute") {
-                    // console.log(status , playhead);
-                    if ((status == "paused" || status == "stopped") && playhead < 1) {// playheadは必ず0とは限らない
-                        if (isWrapper) {
-                            player.ext_play(1);
-                            player.ext_setCommentVisible();
-                            setTimeout(function() {
-                                player.ext_setVideoSize('normal');
-                                player.SetVariable('nico.player._video._visible', 0);
-                            }, 1000);
-                        } else {
-                            player.ext_play(1);
-                            player.ext_setCommentVisible();
-                        }
+
+                // console.log(status , playhead);
+                if ((status == "paused" || status == "stopped") && playhead < 1) {// playheadは必ず0とは限らない
+                    if (isWrapper) {
+                        player.ext_play(1);
+                        player.ext_setCommentVisible();
+                        setTimeout(function() {
+                            player.ext_setVideoSize('normal');
+                            player.SetVariable('nico.player._video._visible', 0);
+                        }, 1000);
+                    } else {
+                        player.ext_play(1);
+                        // player.ext_setCommentVisible();
                     }
                 }
-
             }, 3000);
-        }, ["mute"]);
+        });
     }
 
     function startPlay() {
@@ -228,14 +226,13 @@
                     location.protocol + "//" + location.host,
                     "", window);
             document.dispatchEvent(request);
-        }, []);
+        });
     }
 
-    function evalInPage(fnArg, args) {
-        var argStr = JSON.stringify(args || []);
-        location.href = "javascript:void " + fnArg + ".apply(null," + argStr + ")";
-
+    function evalInPage(fun) {
+        location.href = "javascript:void (" + fun + ")()";
     }
+
 
     /**
      * randomなjsonデータを取得
