@@ -3,6 +3,7 @@
 // @namespace      http://efcl.info/
 // @description    ニコニコ動画の動画をGIGA SCHEMAに登録してシャッフルプレイ
 // @include        http://www.nicovideo.jp/watch/*
+// @require        https://gist.github.com/raw/845920/58c23908b824e8f962f2739aaa90678e8153e3f2/nicovideo_createPanel.js
 // ==/UserScript==
 // http://gigaschema.appspot.com/help
 (function() {
@@ -10,19 +11,84 @@
     var USER_NAME = "azuciao",
             SCHEME_NAME = "playshare";
     var isPlaying = GM_getValue("shareplay") || false;
+    // ニコニコ大百科という名前のタブを作る (panel.id == nicopedia)
+    var nicovideo_createPanel_res = nicovideo_createPanel('shareplay', 'SharePlay'),
+            panel = nicovideo_createPanel_res.panel,
+            label = nicovideo_createPanel_res.label;
+    addCSS(document, 'ul.shareplayer li {'
+            + '    list-style-type: none;'
+            + '}'
+            + 'ul.shareplayer li a {'
+            + '    display: block;'
+            + '    width: 300px;'
+            + '    padding: 8px;'
+            + '    border: 3px solid #fff;'
+            + '    color: #fff;'
+            + '    cursor: default;'
+            + '    font-size: 24px;'
+            + '    text-align: center;'
+            + '    text-decoration: none;'
+            + '    background-color: orange;'
+            + '    text-shadow: 0px -1px 0px #ccc; /* FF3.5+, Opera 9+, Saf1+, Chrome */'
+            + '    border-radius: .5em;'
+            + '    -webkit-border-radius: .5em;'
+            + '    -moz-border-radius: .5em;'
+            + '    box-shadow: 0 0 5px rgba(0, 0, 0, .5);'
+            + '    -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .5);'
+            + '    -moz-box-shadow: 0 0 5px rgba(0, 0, 0, .5);'
+            + '}'
+            + 'ul.shareplayer li.shareplayer_play a { background : #8EAC1A; }'
+            + 'ul.shareplayer li.shareplayer_stop a { background : red; }'
+            + 'ul.shareplayer li a:hover {'
+            + '    box-shadow: 0 0 8px rgba(0, 0, 0, .8);'
+            + '    -webkit-box-shadow: 0 0 8px rgba(0, 0, 0, .8);'
+            + '    -moz-box-shadow: 0 0 8px rgba(0, 0, 0, .8);'
+            + '}'
+            + 'ul.shareplayer li a:after {'
+            + '    content: "\00BB";'
+            + '    padding-left: .5em;'
+            + '}'
+            + 'ul.shareplayer li a {'
+            + '    -moz-transition: -moz-box-shadow .4s ease-out; /* FF3.7+ */'
+            + '    -o-transition: box-shadow .4s ease-out; /* Opera 10.5 */'
+            + '    -webkit-transition: -webkit-box-shadow .4s ease-out; /* Saf3.2+, Chrome */'
+            + '    transition: box-shadow .4s ease-out;'
+            + '}');
+    var status_ul = document.createElement("ul"),
+            status_li_play = document.createElement("li"),
+            status_li_stop = document.createElement("li");
+    addClassName(status_ul, "shareplayer");
+    addClassName(status_li_play, "shareplayer_play");
+    addClassName(status_li_stop, "shareplayer_stop");
+    var status_li_play_a = document.createElement("a"),
+            status_li_stop_a = document.createElement("a");
+    status_li_play_a["textContent" || "innerText"] = "PLAY!"
+    status_li_stop_a["textContent" || "innerText"] = "STOP!"
+    // Next , STOP イベント
+    status_li_play_a.addEventListener("click", function() {
+        startPlay()
+    }, false);
+    status_li_stop_a.addEventListener("click", function() {
+        stopMovie();
+    }, false);
+    status_li_play.appendChild(status_li_play_a);
+    status_li_stop.appendChild(status_li_stop_a);
+    // 登録ボタンの追加
     if (isPlaying) {
         playMovie();
     } else {
-        var insertHere = document.getElementById("outside");
-        insertHere.appendChild(submitBt);
-        var submitBt = document.createElement("a");
-        submitBt["textContent" || "innerText"] = "いいね!";
-        submitBt.addEventListener("click", function() {
-            insertHere.removeChild(submitBt);// 自爆する
+        var submit_li = document.createElement("li");
+        var submit_a = document.createElement("a");
+        submit_a["textContent" || "innerText"] = "いいね!"
+        submit_a.addEventListener("click", function() {
+            status_ul.removeChild(submit_li);// 自爆する
             submitToSever();
         }, false);
-
+        submit_li.appendChild(submit_a);
+        status_ul.appendChild(submit_li);
     }
+    status_ul.appendChild(status_li_play).appendChild(status_li_stop);
+    panel.appendChild(status_ul);
     if (typeof GM_registerMenuCommand !== 'undefined') {
         GM_registerMenuCommand("Nico share play - トグル", function() {
             toggleSwitch();
@@ -116,9 +182,13 @@
         }, ["mute"]);
     }
 
+    function startPlay() {
+        isPlaying = true;
+        saveStatus();
+        playNext();
+    }
 
     function playNext(vid) {
-        if (!isPlaying) return;
         if (vid) {
             location.href = "http://www.nicovideo.jp/watch/" + valueData.vid;
         } else {
@@ -193,6 +263,21 @@
             GM_log(xhr.statusText + " : " + xhr.responseText);
         }
         xhr.send(sendBody);
+    }
+
+    function addCSS(context, css) {
+        if (!context) context = document;
+        if (context.createStyleSheet) { // for IE
+            var sheet = context.createStyleSheet();
+            sheet.cssText = css;
+            return sheet;
+        } else {
+            var sheet = context.createElement('style');
+            sheet.type = 'text/css';
+            var _root = context.getElementsByTagName('head')[0] || context.documentElement;
+            sheet.textContent = css;
+            return _root.appendChild(sheet).sheet;
+        }
     }
 })();
 function log(m) {
