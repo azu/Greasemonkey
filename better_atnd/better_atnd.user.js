@@ -112,8 +112,8 @@ atnd.eventID = window.location.pathname.split("/").pop();
 })();
 (function gCal() {
     function formatToUTCDate(jstDateTime) {
-        if (jstDateTime == null) {
-            return null;
+        if (!jstDateTime) {
+            return;
         }
         var dateTime = jstDateTime.replace(/[-,:]/g, "").replace(/.....$/, "");
         var jstDate = Number(dateTime.slice(0, 8));
@@ -136,20 +136,25 @@ atnd.eventID = window.location.pathname.split("/").pop();
         if ("catch" in event) {
             descrition = event["catch"] + "\n" + descrition;// キャッチを追加する
         }
-        description = encodeURIComponent((descrition.length < 300) ? // 文字数が多いとRequest-URI Too Largeになる
+        var description = encodeURIComponent((descrition.length < 300) ? // 文字数が多いとRequest-URI Too Largeになる
                 descrition : descrition.substring(0, 300) + '...');
         var title = encodeURIComponent(event.title),
                 started_at = formatToUTCDate(event.started_at || ""),
                 ended_at = formatToUTCDate(event.ended_at || ""),
                 address = encodeURIComponent(event.address || "");
+
+        var dates = "&dates=" + started_at + "/"
+        if (ended_at) {
+            dates += ended_at;
+        } else {
+            dates += started_at;// ないなら開始時間と同じ
+        }
         // カレンダーリンクを生成
         var link = document.createElement('a');
-
         link.innerHTML = "<img src='http://www.google.com/calendar/images/ext/gc_button1_ja.gif' border=0></a>";
-
         link.setAttribute('href',
                 'https://www.google.com/calendar/event?action=TEMPLATE&text=' + title
-                        + "&dates=" + started_at + "/" + ended_at + ""
+                        + dates
                         + "&details=" + description + "&location=" + address + "&trp=false&sprop=website:atnd.org&sprop;=name:ATND");
         return link;
     }
