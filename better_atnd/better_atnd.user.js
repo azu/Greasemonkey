@@ -7,12 +7,14 @@
 var DEBUG = true;
 function log(m) {
     var w = this.unsafeWindow || window;
+    for (var i = 0,len = arguments.length; i < len; i++) {
+
+    }
     w.console && w.console.log.apply(this, arguments);
 }
 var atnd = this.atnd || {};
+atnd.eventID = window.location.pathname.split("/").pop();
 (function() {
-    var eventID = window.location.pathname.split("/").pop();
-
     function getEventJSON(eventID, callback) {
         var endpoint = "http://api.atnd.org/events/?event_id=" + eventID + "&format=json";
         GM_xmlhttpRequest({
@@ -21,6 +23,7 @@ var atnd = this.atnd || {};
             onload:function(res) {
                 var json = JSON.parse(res.responseText);
                 DEBUG && log(res.statusText, json);
+                atnd[atnd.eventID] = json;// キャッシュしておく
                 callback(json);
             },
             onerror:function(res) {
@@ -75,15 +78,19 @@ var atnd = this.atnd || {};
                     dl.appendChild(dd);
                 }
                 resultHTML.appendChild(dl);
-                DEBUG && log("resultHTML", resultHTML);
+                var serializer = new XMLSerializer();
+                DEBUG && log("resultHTML", serializer.serializeToString(resultHTML));
                 callback(resultHTML);
+            },
+            onerror:function(res) {
+                log(res.statusText + " : " + res.responseText);
             }
         });
 
     }
 
     function getStationHTML(callback) {
-        getEventJSON(eventID, function(res) {
+        getEventJSON(atnd.eventID, function(res) {
             var geoObj = getGeoinfo(res);
             getNearsideStation(geoObj, function(resHTML) {
                 DEBUG && log("getStationHTML", resHTML);
@@ -93,14 +100,68 @@ var atnd = this.atnd || {};
     }
 
     atnd.st = {
-        'eventID' : eventID,
         'getEventJSON' : getEventJSON,
         'getNearsideStation' :getNearsideStation,
         'getStationHTML' : getStationHTML
     };
 })();
+(function gCal() {
+    function formatToUTCDate(jstDateTime) {
+        if (jstDateTime == null) {
+            return null;
+        }
+        var dateTime = jstDateTime.replace(/[-,:]/g, "").replace(/.....$/, "");
+        var jstDate = Number(dateTime.slice(0, 8));
+        var jstTime = Number(dateTime.slice(9, 15));
+        var utcDate;
+        if (jstTime < 90000) {
+            utcDate = jstDate - 1;
+        } else {
+            utcDate = jstDate;
+        }
+        var utcTime = String((jstTime + 240000 - 90000) % 240000);
+        utcTime = utcTime.length == 6 ? utcTime : '0' + utcTime;
+        return utcDate + 'T' + utcTime + 'Z';
+    }
 
-var insertArea = document.querySelector('#events-show > div.main > div.events-show-info');
-atnd.st.getStationHTML(function(stationHTML) {
-    insertArea.appendChild(stationHTML);
-});
+    function createCalendarLink(json) {
+        json = json || atnd[atnd.eventID] || atnd.st.getEventJSON(createCalendarLink);
+        var event = json.events[0];// イベントの情報が入ってる
+        var descrition = document.getElementById("post-body")["textContent" || "innerText"].trim();// API経由だと記法が入ってしまう
+        descrition += event["catch"];// キャッチを追加する￥
+        description = encodeURIComponent((descrition.length < 300) ? // 文字数が多いとRequest-URI Too Largeになる
+                descrition : descrition.substring(0, 300) + '...');
+        var title = encodeURIComponent(event.title),
+                started_at = formatToUTCDate(event.started_at),
+                ended_at = formatToUTCDate(event.ended_at),
+                address = encodeURIComponent(event.address);
+        // カレンダーリンクを生成
+        var link = document.createElement('a');
+
+        link.innerHTML = "<img src='http://www.google.com/calendar/images/ext/gc_button1_ja.gif' border=0></a>";
+
+        link.setAttribute('href',
+                'https://www.google.com/calendar/event?action=TEMPLATE&text=' + title
+                        + "&dates=" + started_at + "/" + ended_at + ""
+                        + "&details=" + description + "&location=" + address + "&trp=false&sprop=website:atnd.org&sprop;=name:ATND");
+        return link;
+    }
+
+    atnd.gCal = {
+        'createCalendarLink' : createCalendarLink
+    }
+})();
+(function main() {
+    var insertArea = document.querySelector('#events-show > div.main > div.events-show-info');
+    atnd.st.getStationHTML(function(stationHTML) {
+        insertArea.appendChild(stationHTML);
+        // Google Calendar
+        var title_ul = document.querySelector('div.title-btn > ul');
+        var link = atnd.gCal.createCalendarLink();
+        var li = document.createElement("li");
+        li.appendChild(link);
+        title_ul.appendChild(li);
+    });
+
+})();
+
