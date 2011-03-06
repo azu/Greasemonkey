@@ -110,17 +110,9 @@
         recordData("value=" + ev.data, finishSubmit);
     }, false);
     window.addEventListener('NicoSharePlay.start', function(ev) {
-        // eventを受け取り
-        // JSON.parse(ev.data)してobjectに変換
-        // containerからdispatchしておくと,
-        // ev.targetから対象のDOM Elementも送り付けられる
         playMovie();
     }, false);
     window.addEventListener('NicoSharePlay.next', function(ev) {
-        // eventを受け取り
-        // JSON.parse(ev.data)してobjectに変換
-        // containerからdispatchしておくと,
-        // ev.targetから対象のDOM Elementも送り付けられる
         playNext();
     }, false);
 
