@@ -4,17 +4,19 @@
 // @description    ATNDをより便利にする
 // @include        http://atnd.org/events/*
 // ==/UserScript==
-var DEBUG = true;
+/* TEST PAGE
+ http://atnd.org/events/13389
+ http://atnd.org/events/10996
+ */
+var DEBUG = false;
 function log(m) {
     var w = this.unsafeWindow || window;
-    for (var i = 0,len = arguments.length; i < len; i++) {
-
-    }
     w.console && w.console.log.apply(this, arguments);
 }
 var atnd = this.atnd || {};
 atnd.eventID = window.location.pathname.split("/").pop();
 (function() {
+    // ATND APIからイベント情報取得
     function getEventJSON(eventID, callback) {
         var endpoint = "http://api.atnd.org/events/?event_id=" + eventID + "&format=json";
         GM_xmlhttpRequest({
@@ -27,13 +29,13 @@ atnd.eventID = window.location.pathname.split("/").pop();
                 callback(json);
             },
             onerror:function(res) {
-                log(res.statusText + " : " + res.responseText);
+                GM_log(res.statusText + " : " + res.responseText);
             }
         });
     }
 
+    // 緯度経度情報の取得
     function getGeoinfo(json) {
-        // 緯度経度情報の取得
         var event = json.events[0];
         var lon = event.lon,
                 lat = event.lat
@@ -49,9 +51,8 @@ atnd.eventID = window.location.pathname.split("/").pop();
         }
     }
 
+    // 緯度経度から最寄り駅情報を取得
     function getNearsideStation(geo, callback) {
-
-        // 緯度経度から最寄り駅情報を取得
         var endpoint = "http://map.simpleapi.net/stationapi?x=" + String(geo.lon) + "&y=" + String(geo.lat) + "&output=json";
         var count = 0;
         GM_xmlhttpRequest({
@@ -78,12 +79,11 @@ atnd.eventID = window.location.pathname.split("/").pop();
                     dl.appendChild(dd);
                 }
                 resultHTML.appendChild(dl);
-                var serializer = new XMLSerializer();
-                DEBUG && log("resultHTML", serializer.serializeToString(resultHTML));
+                DEBUG && log("resultHTML", resultHTML);
                 callback(resultHTML);
             },
             onerror:function(res) {
-                log(res.statusText + " : " + res.responseText);
+                GM_log(res.statusText + " : " + res.responseText);
             }
         });
 
