@@ -8,7 +8,7 @@
  http://atnd.org/events/13389
  http://atnd.org/events/10996
  */
-var DEBUG = false;
+var DEBUG = true;
 function log(m) {
     var w = this.unsafeWindow || window;
     w.console && w.console.log.apply(this, arguments);
@@ -18,20 +18,24 @@ atnd.eventID = window.location.pathname.split("/").pop();
 (function() {
     // ATND APIからイベント情報取得
     function getEventJSON(eventID, callback) {
-        var endpoint = "http://api.atnd.org/events/?event_id=" + eventID + "&format=json";
-        GM_xmlhttpRequest({
-            method:"GET",
-            url: endpoint,
-            onload:function(res) {
-                var json = JSON.parse(res.responseText);
-                DEBUG && log(res.statusText, json);
-                atnd[atnd.eventID] = json;// キャッシュしておく
-                callback(json);
-            },
-            onerror:function(res) {
-                GM_log(res.statusText + " : " + res.responseText);
-            }
-        });
+        if (typeof atnd[atnd.eventID] !== 'undefined') {
+            callback(atnd[atnd.eventID]);
+        } else {
+            var endpoint = "http://api.atnd.org/events/?event_id=" + eventID + "&format=json";
+            GM_xmlhttpRequest({
+                method:"GET",
+                url: endpoint,
+                onload:function(res) {
+                    var json = JSON.parse(res.responseText);
+                    DEBUG && log(res.statusText, json);
+                    atnd[atnd.eventID] = json;// キャッシュしておく
+                    callback(json);
+                },
+                onerror:function(res) {
+                    GM_log(res.statusText + " : " + res.responseText);
+                }
+            });
+        }
     }
 
     // 緯度経度情報の取得
@@ -91,9 +95,9 @@ atnd.eventID = window.location.pathname.split("/").pop();
 
     function getStationHTML(callback) {
         getEventJSON(atnd.eventID, function(res) {
-            var geoObj = getGeoinfo(res);
-            if (geoObj) {
-                getNearsideStation(geoObj, function(resHTML) {
+            atnd.st.geo = getGeoinfo(res);
+            if (atnd.st.geo) {
+                getNearsideStation(atnd.st.geo, function(resHTML) {
                     DEBUG && log("getStationHTML", resHTML);
                     callback(resHTML);
                 });
@@ -103,6 +107,7 @@ atnd.eventID = window.location.pathname.split("/").pop();
             }
         });
     }
+
 
     atnd.st = {
         'getEventJSON' : getEventJSON,
@@ -164,10 +169,15 @@ atnd.eventID = window.location.pathname.split("/").pop();
     }
 })();
 (function main() {
-    var insertArea = document.querySelector('#events-show > div.main > div.events-show-info');
+    var insertArea = document.querySelector('#events-show > div.main');
+    var stationArea = insertArea.querySelector('div.events-show-info');
+    var mapArea = insertArea.querySelector('div.events-show-map');
     atnd.st.getStationHTML(function(stationHTML) {
         if (typeof stationHTML !== 'undefined') {
-            insertArea.appendChild(stationHTML);
+            stationArea.appendChild(stationHTML);
+            var stationMapImg = document.createElement("img");
+            stationMapImg.src = "http://map.simpleapi.net/stationmap?x=" + atnd.st.geo.lon + "&y=" + atnd.st.geo.lat;
+            mapArea.appendChild(stationMapImg);
         }
         // Google Calendar
         var title_ul = document.querySelector('div.title-btn > ul');
