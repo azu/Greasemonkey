@@ -92,10 +92,15 @@ atnd.eventID = window.location.pathname.split("/").pop();
     function getStationHTML(callback) {
         getEventJSON(atnd.eventID, function(res) {
             var geoObj = getGeoinfo(res);
-            getNearsideStation(geoObj, function(resHTML) {
-                DEBUG && log("getStationHTML", resHTML);
-                callback(resHTML);
-            });
+            if (geoObj) {
+                getNearsideStation(geoObj, function(resHTML) {
+                    DEBUG && log("getStationHTML", resHTML);
+                    callback(resHTML);
+                });
+            } else {
+                DEBUG && log("getStationHTML : GEO INFO doesn't exist");
+                callback();
+            }
         });
     }
 
@@ -128,13 +133,15 @@ atnd.eventID = window.location.pathname.split("/").pop();
         json = json || atnd[atnd.eventID] || atnd.st.getEventJSON(createCalendarLink);
         var event = json.events[0];// イベントの情報が入ってる
         var descrition = document.getElementById("post-body")["textContent" || "innerText"].trim();// API経由だと記法が入ってしまう
-        descrition += event["catch"];// キャッチを追加する￥
+        if ("catch" in event) {
+            descrition = event["catch"] + "\n" + descrition;// キャッチを追加する
+        }
         description = encodeURIComponent((descrition.length < 300) ? // 文字数が多いとRequest-URI Too Largeになる
                 descrition : descrition.substring(0, 300) + '...');
         var title = encodeURIComponent(event.title),
-                started_at = formatToUTCDate(event.started_at),
-                ended_at = formatToUTCDate(event.ended_at),
-                address = encodeURIComponent(event.address);
+                started_at = formatToUTCDate(event.started_at || ""),
+                ended_at = formatToUTCDate(event.ended_at || ""),
+                address = encodeURIComponent(event.address || "");
         // カレンダーリンクを生成
         var link = document.createElement('a');
 
@@ -154,7 +161,9 @@ atnd.eventID = window.location.pathname.split("/").pop();
 (function main() {
     var insertArea = document.querySelector('#events-show > div.main > div.events-show-info');
     atnd.st.getStationHTML(function(stationHTML) {
-        insertArea.appendChild(stationHTML);
+        if (typeof stationHTML !== 'undefined') {
+            insertArea.appendChild(stationHTML);
+        }
         // Google Calendar
         var title_ul = document.querySelector('div.title-btn > ul');
         var link = atnd.gCal.createCalendarLink();
