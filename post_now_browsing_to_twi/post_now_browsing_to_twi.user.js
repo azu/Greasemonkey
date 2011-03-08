@@ -244,6 +244,7 @@
                                     text("Prefix:", 'defaultTag', "Now browsing: ", { size: 20 }), '\n',
                                     checkbox("Use selection quote", 'isSelection', true), '\n',
                                     checkbox("remove utm_* parameter", 'removeUtm', false), '\n',
+                                    checkbox("avoid link to @ and #", 'avoidLinktoMeta', false), '\n',
                                     checkbox("Post with Ctrl+Enter", 'PostWithCtrl', false), '\n',
                                     text("ShortcutKey:", 'ShortCutKey', "CS-Enter", { size: 16 })
                                     )
@@ -846,8 +847,13 @@
             normalURL = item.link;
             title = item.title + " - " + feed.channel.title;
         }
+        // utm_*を取り除く
         if (GM_settings.removeUtm) {
             normalURL = normalURL.replace(/([\?\&]utm_(source|medium|campaign|content)=.+)/ig, '');
+        }
+        // @や#を取り除く
+        if(GM_settings.avoidLinktoMeta){
+            title = removeMeta(title);
         }
         var receivedShortUrl = new makeShortURL(normalURL);// 初期化
         receivedShortUrl.getShortURL(function(shortedURL) {
@@ -855,5 +861,15 @@
             twitterNew.make_message();
         });
     });
-
+    // ユーザー名やハッシュタグのリンクをさせないようにゼロ幅文字を挟む
+    function removeMeta(str){
+        var reg = {
+            'userName' : /\B(@)([a-zA-Z0-9_]{1,20})\b/g,
+            'hashTag' : /(?:^|[^a-zA-Z0-9&?]+)(#)(\w*[a-zA-Z_]\w*)/g
+        };
+        for (var i in reg) {
+            str = str.replace(reg[i] , "$1‌$2");// $1 ゼロ幅文字 $2
+        }
+        return str;
+    }
 })();
