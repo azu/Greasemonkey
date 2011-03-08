@@ -864,8 +864,8 @@
     // ユーザー名やハッシュタグのリンクをさせないようにゼロ幅文字を挟む
     function removeMeta(str){
         var reg = {
-            'userName' : /\B(@)([a-zA-Z0-9_]{1,20})\b/g,
-            'hashTag' : /(?:^|[^a-zA-Z0-9&?]+)(#)(\w*[a-zA-Z_]\w*)/g
+            'userName' : /\B([@＠])([a-zA-Z0-9_]{1,20})\b/g,
+            'hashTag' : /\B([#＃])([a-zA-Z0-9_]+)/g
         };
         for (var i in reg) {
             str = str.replace(reg[i] , "$1‌$2");// $1 ゼロ幅文字 $2
