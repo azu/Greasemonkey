@@ -467,14 +467,14 @@
                     } else {
                         r = selectionRange;
                     }
-                    var selection = r.toString();
+                    var selection = r.toString().trim();
                     if (selection.length > 1) {
                         t = [' 「',selection,'」 ',' "',this.title,'" '].join('');
                     } else {
                         t = [' "',this.title,'" '].join('');
                     }
                 } else if (count == 1) {// 単一の選択範囲→「引用」"タイトル"
-                    var selection = sel.toString();
+                    var selection = sel.toString().trim();
                     if (selection.length > 1) {
                         t = [' 「',selection,'」 ',' "',this.title,'" '].join('');
                     } else {
