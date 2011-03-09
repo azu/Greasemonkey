@@ -8,7 +8,7 @@
  http://atnd.org/events/13389
  http://atnd.org/events/10996
  */
-var DEBUG = true;
+var DEBUG = false;
 function log(m) {
     var w = this.unsafeWindow || window;
     w.console && w.console.log.apply(this, arguments);
@@ -137,7 +137,7 @@ atnd.eventID = window.location.pathname.split("/").pop();
     function createCalendarLink(json) {
         json = json || atnd[atnd.eventID] || atnd.st.getEventJSON(createCalendarLink);
         var event = json.events[0];// イベントの情報が入ってる
-        var descrition = document.getElementById("post-body")["textContent" || "innerText"].trim();// API経由だと記法が入ってしまう
+        var descrition = location.href + '\n_' + document.getElementById("post-body").textContent.trim();// API経由だと記法が入ってしまう
         if ("catch" in event) {
             descrition = event["catch"] + "\n" + descrition;// キャッチを追加する
         }
