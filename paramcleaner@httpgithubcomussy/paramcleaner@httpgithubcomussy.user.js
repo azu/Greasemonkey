@@ -24,11 +24,13 @@
         return;
     }
     const SITEINFO = [
+
+        { // Google Analytics
+            url: "^http://www\.ustream\.tv/(channel|recorded)/",
+            kill: "utm_campaign utm_content utm_medium utm_source utm_term",
+            exsample : 'http://www.ustream.tv/channel/fukushima-power-plant-symposium#utm_campaign=unknown&utm_source=7836105&utm_medium=social'
+        },
         /*
-         { // Google Analytics
-         url: "^https?://[^?#]+[?#].*\\butm_(?:c(?:ampaign|ontent)|medium|source|term)\\b",
-         kill: "utm_campaign utm_content utm_medium utm_source utm_term"
-         },
          { // YouTube
          url: "^http://www\\.youtube\\.com/watch\\?",
          live: "v"
@@ -38,13 +40,13 @@
     ];
 
     function getParamsStr(url) {
-        var re = /\?([^#]+)/
+        var re = /[?#]([^#]+)/
         var matched = url.match(re)
         return matched ? matched[1] : null
     }
 
     function getParamsReplaceStr(url, str) {
-        var re = /\?([^#]+)/
+        var re = /[?#]([^#]+)/
         return url.replace(re, str)
     }
 
@@ -54,7 +56,7 @@
         if (paramsStr) {
             paramsStr.split('&').forEach(function(i) {
                 r.push(i.split('='))
-            })
+            });
         }
         return r
     }
@@ -128,7 +130,9 @@
         if (!(new RegExp(data.url).test(nURL))) {
             return;
         }
+        console.log(nURL, data);
         var cleanURL = removeUtmParams(nURL, data);// paramを取り除く
+
         if (nURL !== cleanURL) {
             if (win.history) {
                 history && history.replaceState(null, document.title, cleanURL);
