@@ -129,7 +129,6 @@
         if (!(new RegExp(data.url).test(nURL))) {
             return;
         }
-        console.log(nURL, data);
         var cleanURL = removeUtmParams(nURL, data);// paramを取り除く
 
         if (nURL !== cleanURL) {
