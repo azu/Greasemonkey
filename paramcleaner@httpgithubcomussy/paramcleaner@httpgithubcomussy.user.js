@@ -24,15 +24,14 @@
         return;
     }
     const SITEINFO = [
-
-        { // Google Analytics
-            url: "^http://www\.ustream\.tv/(channel|recorded)/",
-            kill: "utm_campaign utm_content utm_medium utm_source utm_term",
-            exsample : 'http://www.ustream.tv/channel/fukushima-power-plant-symposium#utm_campaign=unknown&utm_source=7836105&utm_medium=social'
-        },
         /*
+         { // USt
+         url: "^http://www\.ustream\.tv/(channel|recorded)/",
+         kill: "utm_campaign utm_content utm_medium utm_source utm_term",
+         exampleUrl : 'http://www.ustream.tv/channel/fukushima-power-plant-symposium#utm_campaign=unknown&utm_source=7836105&utm_medium=social'
+         },
          { // YouTube
-         url: "^http://www\\.youtube\\.com/watch\\?",
+         url: "^http://www\.youtube\.com/watch\?",
          live: "v"
          }
          */
