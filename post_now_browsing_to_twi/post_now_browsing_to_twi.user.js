@@ -578,7 +578,7 @@
             }
             var counter = obj.url.length;
 
-            // https://twitter.com/azu_re/statuses/16219838145
+            // バグ - https://twitter.com/azu_re/statuses/16219838145
             var E4Xhtml = <div style="display: block;" id="GM_Now_Box" class="GM_Now_ThemeDefault">
                 <input type="text" value="" id="GM_Now_InputField" class="GM_Now_ThemeDefault" />
                 <div id="GM_Now_Sub">
