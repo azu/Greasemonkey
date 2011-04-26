@@ -203,10 +203,10 @@
     }
     ShortcutKey.prototype.add = function(elm, key, func) {
         this.list.push({
-            'element' : elm,
-            'key'     : key,
-            'func'    : func
-        });
+                    'element' : elm,
+                    'key'     : key,
+                    'func'    : func
+                });
     }
     ShortcutKey.prototype.get = function(evt) {
         var key = [], k = '';
@@ -236,7 +236,7 @@
             ]
             dialog(
                     "Post Now browsing to Twitter Settings",
-            { width: 600, height: 700 },
+                    { width: 600, height: 700 },
 
                     section(
                             "User options",
@@ -248,8 +248,8 @@
                                     checkbox("avoid link to @ and #", 'avoidLinktoMeta', false), '\n',
                                     checkbox("Post with Ctrl+Enter", 'PostWithCtrl', false), '\n',
                                     text("ShortcutKey:", 'ShortCutKey', "CS-Enter", { size: 16 })
-                                    )
-                            ),
+                            )
+                    ),
                     section(
                             "Short URL options",
                             "select used Short URL service",
@@ -260,35 +260,35 @@
                                     text("bit.ly APIKey :", 'bitlyAPIKey', 'R_fa2240c646c07b2091c6bc6d109089ef', { size: 30 }),
                                     '\n',
                                     text("goo.gl APIKey :", 'googlAPIKey', '', { size: 30 })
-                                    )
-                            ),
+                            )
+                    ),
                     section(
                             "OAuth Authorization",
                             "Sign in with Twitter"
-                            )
-                    );
+                    )
+            );
         }
     }, {
-        saveKey: 'GM_config',
-        aftersave: function() {
+                saveKey: 'GM_config',
+                aftersave: function() {
 
-        },
-        afteropen : function() {
-            // ショートカットの入力補助
-            var iframeDoc = this.frame.contentDocument;
-            iframeDoc.getElementById("control_ShortCutKey").addEventListener('keydown', function (evt) {
-                evt.preventDefault();
-                this.value = shortcut.get(evt);
-            }, false);
-            // OAuth Setting
-            if (TWOauth.isAuthorize()) {
-                TWOauth.injectToConfig();
-            } else {
-                XHRloading.createText(iframeDoc);
-                TWOauth.getRequestToken(TWOauth.injectToConfig);
-            }
-        }
-    });
+                },
+                afteropen : function() {
+                    // ショートカットの入力補助
+                    var iframeDoc = this.frame.contentDocument;
+                    iframeDoc.getElementById("control_ShortCutKey").addEventListener('keydown', function (evt) {
+                        evt.preventDefault();
+                        this.value = shortcut.get(evt);
+                    }, false);
+                    // OAuth Setting
+                    if (TWOauth.isAuthorize()) {
+                        TWOauth.injectToConfig();
+                    } else {
+                        XHRloading.createText(iframeDoc);
+                        TWOauth.getRequestToken(TWOauth.injectToConfig);
+                    }
+                }
+            });
     GM_registerMenuCommand('Post Now browsing to Twitter Setting', Config.open);
 
 
@@ -686,7 +686,7 @@
         },
         post : function() {
             var content = {status: this.post_message, source: clientInfo.name};
-            TWOauth.post('http://api.twitter.com/1/statuses/update.json', content, function() {
+            TWOauth.post('https://api.twitter.com/1/statuses/update.json', content, function() {
                 GM_log("POST!");
             });
         }
@@ -853,7 +853,7 @@
             normalURL = normalURL.replace(/([\?\&]utm_(source|medium|campaign|content)=.+)/ig, '');
         }
         // @や#を取り除く
-        if(GM_settings.avoidLinktoMeta){
+        if (GM_settings.avoidLinktoMeta) {
             title = removeMeta(title);
         }
         var receivedShortUrl = new makeShortURL(normalURL);// 初期化
@@ -863,13 +863,13 @@
         });
     });
     // ユーザー名やハッシュタグのリンクをさせないようにゼロ幅文字を挟む
-    function removeMeta(str){
+    function removeMeta(str) {
         var reg = {
             'userName' : /\B([@＠])([a-zA-Z0-9_]{1,20})\b/g,
             'hashTag' : /\B([#＃])([a-zA-Z0-9_]+)/g
         };
         for (var i in reg) {
-            str = str.replace(reg[i] , "$1‌$2");// $1 ゼロ幅文字 $2
+            str = str.replace(reg[i], "$1‌$2");// $1 ゼロ幅文字 $2
         }
         return str;
     }
