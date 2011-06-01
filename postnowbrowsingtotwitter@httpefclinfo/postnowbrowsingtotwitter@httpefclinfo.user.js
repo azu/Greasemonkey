@@ -14,14 +14,6 @@
 
 (function() {
 
-    // iframe内では実行させない
-    try {
-        if (top !== self) {
-            throw 0;
-        }
-    } catch(e) {
-        return false;
-    }
     // XPath関数
     var XPath = {
         cache: null,
