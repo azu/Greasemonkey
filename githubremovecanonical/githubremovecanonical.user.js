@@ -7,12 +7,12 @@
 // ==/UserScript==
 
 (function() {
-    //const currentPath = unsafeWindow.GitHub.currentPath; // 現在地
+    // const currentPath = unsafeWindow.GitHub.currentPath;// 現在地
     const repoName = unsafeWindow.GitHub.repoName;// レポジトリかどうか確認に使う
     const controllerName = unsafeWindow.GitHub.controllerName;// tree , commmit
     const currentRef = unsafeWindow.GitHub.currentRef;// master - Canonicalはmasterの時の変更されてるかな?
     if (!repoName) {
-        return; // レポジトリじゃない
+        return;
     }
     main();
     function checkCanonical(href) {
