@@ -195,16 +195,17 @@
     }
     ShortcutKey.prototype.add = function(elm, key, func) {
         this.list.push({
-                    'element' : elm,
-                    'key'     : key,
-                    'func'    : func
-                });
+            'element' : elm,
+            'key'     : key,
+            'func'    : func
+        });
     }
     ShortcutKey.prototype.get = function(evt) {
         var key = [], k = '';
         for (mk in this.mkeys) {
-            if (evt[mk])
+            if (evt[mk]) {
                 key.push(this.mkeys[mk]);
+            }
         }
         if (evt.which) {
             k = this.keys[evt.which] || String.fromCharCode(evt.which).toLowerCase();
@@ -218,49 +219,49 @@
     // ショートカットの定義
     var shortcut = new ShortcutKey();
     Config.define('usc_basic', function() {
-        with (this.builder) {
-            var shortURL_opt = [
-                'bit.ly',
-                'j.mp',
-                'goo.gl',
-                'is.gd',
-                'tinyurl.com'
-            ];
-            dialog(
-                    "Post Now browsing to Twitter Settings",
-                    { width: 600, height: 700 },
+                with (this.builder) {
+                    var shortURL_opt = [
+                        'bit.ly',
+                        'j.mp',
+                        'goo.gl',
+                        'is.gd',
+                        'tinyurl.com'
+                    ];
+                    dialog(
+                            "Post Now browsing to Twitter Settings",
+                            { width: 600, height: 700 },
 
-                    section(
-                            "User options",
-                            "Behavior/keyboard Preference",
-                            grid(
-                                    text("Prefix:", 'defaultTag', "Now browsing: ", { size: 20 }), '\n',
-                                    checkbox("Use selection quote", 'isSelection', true), '\n',
-                                    checkbox("remove utm_* parameter", 'removeUtm', false), '\n',
-                                    checkbox("avoid link to @ and #", 'avoidLinktoMeta', false), '\n',
-                                    checkbox("Post with Ctrl+Enter", 'PostWithCtrl', false), '\n',
-                                    text("ShortcutKey:", 'ShortCutKey', "CS-Enter", { size: 16 })
-                            )
-                    ),
-                    section(
-                            "Short URL options",
-                            "select used Short URL service",
+                            section(
+                                    "User options",
+                                    "Behavior/keyboard Preference",
+                                    grid(
+                                            text("Prefix:", 'defaultTag', "Now browsing: ", { size: 20 }), '\n',
+                                            checkbox("Use selection quote", 'isSelection', true), '\n',
+                                            checkbox("remove utm_* parameter", 'removeUtm', false), '\n',
+                                            checkbox("avoid link to @ and #", 'avoidLinktoMeta', false), '\n',
+                                            checkbox("Post with Ctrl+Enter", 'PostWithCtrl', false), '\n',
+                                            text("ShortcutKey:", 'ShortCutKey', "CS-Enter", { size: 16 })
+                                    )
+                            ),
+                            section(
+                                    "Short URL options",
+                                    "select used Short URL service",
 
-                            grid(
-                                    select("Short URL Services", 'ShortURL', shortURL_opt, "bit.ly"), '\n',
-                                    text("bit.ly Username:", 'bitlyUserName', "remiko"), '\n',
-                                    text("bit.ly APIKey :", 'bitlyAPIKey', 'R_fa2240c646c07b2091c6bc6d109089ef', { size: 30 }),
-                                    '\n',
-                                    text("goo.gl APIKey :", 'googlAPIKey', '', { size: 30 })
+                                    grid(
+                                            select("Short URL Services", 'ShortURL', shortURL_opt, "bit.ly"), '\n',
+                                            text("bit.ly Username:", 'bitlyUserName', "remiko"), '\n',
+                                            text("bit.ly APIKey :", 'bitlyAPIKey', 'R_fa2240c646c07b2091c6bc6d109089ef', { size: 30 }),
+                                            '\n',
+                                            text("goo.gl APIKey :", 'googlAPIKey', '', { size: 30 })
+                                    )
+                            ),
+                            section(
+                                    "OAuth Authorization",
+                                    "Sign in with Twitter"
                             )
-                    ),
-                    section(
-                            "OAuth Authorization",
-                            "Sign in with Twitter"
-                    )
-            );
-        }
-    },
+                    );
+                }
+            },
             // options
             {
                 saveKey: 'GM_config',
@@ -322,12 +323,12 @@
         'bit.ly' : {
             method: "GET",
             action: "http://api.bit.ly/v3/shorten?&format=txt&login="
-                    + GM_settings.bitlyUserName + "&apiKey=" + GM_settings.bitlyAPIKey + "&longUrl="
+                            + GM_settings.bitlyUserName + "&apiKey=" + GM_settings.bitlyAPIKey + "&longUrl="
         },
         'j.mp' : {
             method: "GET",
             action: "http://api.j.mp/v3/shorten?&format=txt&login="
-                    + GM_settings.bitlyUserName + "&apiKey=" + GM_settings.bitlyAPIKey + "&longUrl="
+                            + GM_settings.bitlyUserName + "&apiKey=" + GM_settings.bitlyAPIKey + "&longUrl="
         },
         'is.gd' : {
             method: "GET",
@@ -512,8 +513,8 @@
             var inputFiled = XPath.first(inputHTML, 'id("GM_Now_InputField")');
             var activityFiled = XPath.first(inputHTML, 'id("GM_Now_SubActivity")');
             var counterBox = XPath.first(inputHTML, 'id("GM_Now_SubCounter")');
-            var counter = parseInt(counterBox.textContent); // 引用 + タイトル + URLの文字数
-            counterBox.textContent = counter + activityFiled.textContent.length;// デフォルトの表示
+            var counter = parseInt(counterBox.textContent, 10); // 引用 + タイトル + URLの文字数
+            counterBox.textContent = counter + strlen(activityFiled.textContent);// デフォルトの表示
             // bodyにもESCキーが聞くように
             document.addEventListener("keypress", function(e) {
                 var esc = (e.keyCode == 27);
@@ -549,9 +550,6 @@
                     e.preventDefault()
                     activityFiled.setAttribute("contenteditable", "true");
                     activityFiled.focus();
-                } else {
-                    // console.log(counter +"#"+ inputFiled.value.length)
-                    counterBox.textContent = counter + activityFiled.textContent.length + inputFiled.value.length;
                 }
             }, false);
             // contenteditableの日本語バグ?回避  - https://twitter.com/azu_re/statuses/16587183821
@@ -561,19 +559,21 @@
             activityFiled.addEventListener("click", function(e) {
                 activityFiled.setAttribute("contenteditable", "true");
             }, false);
-            activityFiled.addEventListener("keyup", function(e) {
-                counterBox.textContent = counter + activityFiled.textContent.length + inputFiled.value.length;
+            // 文字数カウント
+            inputFiled.addEventListener("keyup", function(e) {
+                counterBox.textContent = counter + strlen(activityFiled.textContent) + strlen(inputFiled.value);
             }, false);
-
         },
         // プロンプトのHTML生成
         createHTML : function(obj) {
-            if (!obj) obj = {};
+            if (!obj) {
+                obj = {};
+            }
             var defVal = {
                 activity : (obj.activity) ? obj.activity : "",
                 url   : (obj.url) ? obj.url : ""
             }
-            var counter = obj.url.length;
+            var counter = strlen(obj.url);
 
             // バグ - https://twitter.com/azu_re/statuses/16219838145
             var E4Xhtml = <div style="display: block;" id="GM_Now_Box" class="GM_Now_ThemeDefault">
@@ -653,29 +653,27 @@
                 ]]></>);
         },
         arrangeMes : function() {
-            if (this.comment == null) return;
-            if (this.comment == '') this.comment = defaultTag;
+            if (this.comment == null) {
+                return;
+            }
+            if (this.comment == '') {
+                this.comment = defaultTag;
+            }
 
             var s = [this.comment,this.activity,this.url].join(' ');
             var l = this.activity.length || true;
-            if (l && s.length > 140) {
-                if (UseSelection) {
-                    var cutlength = s.length - (140 - defaultTag.length);
-                    this.activity = this.activity.slice(0, -cutlength)
-                    l = this.activity.length
-                    if (cutlength > this.title.length) {// タイトルを削る
-                        this.activity += '…」';
-                    } else {
-                        this.activity += '…" ';
-                    }
-                    s = [this.comment,this.activity,this.url].join('')
+            var cutlength;
+            if (l && strlen(s) > 140) {
+                cutlength = strlen(s) - (140 - strlen(defaultTag));
+                this.activity = this.activity.slice(0, -cutlength);
+                l = strlen(this.activity);
+                if (UseSelection && cutlength > strlen(this.title)) {
+                    // タイトルを削られた
+                    this.activity += '…」';
                 } else {
-                    var cutlength = s.length - (140 - defaultTag.length);
-                    this.activity = this.activity.slice(0, -cutlength)
-                    l = this.activity.length
                     this.activity += '…" '
-                    s = [this.comment,this.activity,this.url].join('');
                 }
+                s = [this.comment,this.activity,this.url].join('');
             }
             // ポストメッセージの完成
             this.post_message = s;
@@ -708,7 +706,9 @@
      ]]></>);
      */
     function addCSS(context, css) {
-        if (!context) context = document;
+        if (!context) {
+            context = document;
+        }
         if (context.createStyleSheet) { // for IE
             var sheet = context.createStyleSheet();
             sheet.cssText = css;
@@ -818,6 +818,19 @@
         var range = document.createRange();
         var dom = range.createContextualFragment(html);
         return dom;
+    }
+
+    // http://liosk.blog103.fc2.com/blog-entry-162.html
+    function strlen(str) {
+        var i = 0, len = str.length, result = 0;
+        while (i < len) {
+            result++;
+            var x = str.charCodeAt(i++);
+            if (0xD800 <= x && x < 0xDC00) {
+                i++;
+            }
+        }
+        return result;
     }
 
     // debug関数
