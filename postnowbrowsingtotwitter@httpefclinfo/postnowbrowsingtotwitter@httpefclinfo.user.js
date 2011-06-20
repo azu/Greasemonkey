@@ -570,8 +570,8 @@
                 obj = {};
             }
             var defVal = {
-                activity : (obj.activity) ? obj.activity : "",
-                url   : (obj.url) ? obj.url : ""
+                activity : obj.activity || "",
+                url   : obj.url ||  ""
             }
             var counter = strlen(obj.url);
 
