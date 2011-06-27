@@ -407,9 +407,11 @@
                 var timerId = setTimeout((function(arg) {
                     return function() {
                         GM_xhr.abort();
-                        self.changeShortAPI();// 短縮URLを変える。
+                        var isChanged = self.changeShortAPI();// 短縮URLを変える。
                         XHRloading.removeDiv();
-                        arg.callee.apply(self, arg);
+                        if (isChanged) {
+                            arg.callee.apply(self, arg);
+                        }
                     }
                 })(arguments), 7000);
             }
@@ -420,7 +422,7 @@
             for (var i in message) {
                 if (message[i] != siteAPI && !message[i].mark) {
                     siteAPI = i;
-                    break;
+                    return true;
                 }
             }
         }
