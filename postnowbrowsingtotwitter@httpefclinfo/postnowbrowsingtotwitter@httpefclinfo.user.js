@@ -5,10 +5,10 @@
 // @include http://*
 // @include https://*
 // @exclude http://twicli.neocat.jp/twicli.html
-// @require https://github.com/azu/usconfig/raw/v1.13/usconfig.js
-// @require https://github.com/azu/OAuth-for-Greasemonkey/raw/master/oauth.js
-// @require https://github.com/azu/OAuth-for-Greasemonkey/raw/master/sha1.js
-// @require https://github.com/azu/OAuth-for-Greasemonkey/raw/master/GMwrap.js
+// @require https://raw.github.com/azu/usconfig/v1.13/usconfig.js
+// @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/oauth.js
+// @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/sha1.js
+// @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/GMwrap.js
 // @noframes
 // ==/UserScript==
 
@@ -385,7 +385,7 @@
                         clearInterval(timerId);
                         XHRloading.removeDiv();
                         var shortedURL = res.responseText;
-                        if (shortedURL === "undefined") {
+                        if (typeof shortedURL === "undefined" || shortedURL === "undefined") {
                             XHRloading.create();
                             return;
                         }
@@ -398,12 +398,9 @@
                 }
                 XHRobj.onerror = function(e) {
                     GM_log(e);
-                },
-                        XHRobj.onreadystatechange = function(res) {
-                            if (res.readyState == 1) {
-                                XHRloading.create();
-                            }
-                        }
+                }
+                // ローディング表示
+                XHRloading.create();
                 var GM_xhr = GM_xmlhttpRequest(XHRobj);
                 // タイムアウト
                 var self = this;
@@ -414,7 +411,7 @@
                         XHRloading.removeDiv();
                         arg.callee.apply(self, arg);
                     }
-                })(arguments), 5000);
+                })(arguments), 7000);
             }
         },
         // siteAPIを切り替えていく
@@ -571,7 +568,7 @@
             }
             var defVal = {
                 activity : obj.activity || "",
-                url   : obj.url ||  ""
+                url   : obj.url || ""
             }
             var counter = strlen(obj.url);
 
@@ -843,13 +840,17 @@
     }
 
     // ショートカットのイベント設定
-    shortcut.add(window, GM_settings.ShortCutKey, function() {
+    shortcut.add(window, GM_settings.ShortCutKey, launchPNBT);
+    GM_registerMenuCommand("Post to Twitter", function() {
+        launchPNBT();
+    })
+    function launchPNBT() {
         if (!TWOauth.isAuthorize()) {
             alert("You must Sign-in with Twitter");
             Config.open();
             return;
         }
-        var normalURL = document.location.href;
+        var normalURL = window.location.href;
         var title = (document.title) ? document.title : window.parent.document.title;
         if (/(^http:\/\/reader\.livedoor\.com\/|^http:\/\/fastladder\.com\/reader\/)/.test(normalURL)) {
             var w = unsafeWindow;
@@ -871,7 +872,8 @@
             var twitterNew = new postTwitter(shortedURL, title)
             twitterNew.make_message();
         });
-    });
+    }
+
     // ユーザー名やハッシュタグのリンクをさせないようにゼロ幅文字を挟む
     function removeMeta(str) {
         var reg = {
