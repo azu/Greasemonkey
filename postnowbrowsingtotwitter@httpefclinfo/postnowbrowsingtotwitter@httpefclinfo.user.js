@@ -385,8 +385,8 @@
                         clearInterval(timerId);
                         XHRloading.removeDiv();
                         var shortedURL = res.responseText;
+                        // 上手く取得できてない場合はkill
                         if (typeof shortedURL === "undefined" || shortedURL === "undefined") {
-                            XHRloading.create();
                             return;
                         }
                         if (mes.response) {
