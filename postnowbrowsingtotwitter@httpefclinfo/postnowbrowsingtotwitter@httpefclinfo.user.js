@@ -9,6 +9,7 @@
 // @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/oauth.js
 // @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/sha1.js
 // @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/GMwrap.js
+// @run-at  document-end
 // @noframes
 // ==/UserScript==
 
