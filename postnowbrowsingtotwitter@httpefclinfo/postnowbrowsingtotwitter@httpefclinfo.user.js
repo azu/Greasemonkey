@@ -790,7 +790,7 @@
                     top:80%;
                     color:#fff;
                     background:#000;
-                ]]></>);
+                ]]></>.toString());
                 loading.innerHTML = "Now Loading...";
                 loading.id = "loading_message";
                 _doc.body.appendChild(loading);
