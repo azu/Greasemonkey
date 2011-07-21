@@ -188,7 +188,7 @@
             self.list.forEach(function(a) {
                 if (a.key == key && (a.element == evt.target || a.element == evt.view)) {
                     // console.log(a.key +"=="+ key);
-                    a.func();
+                    a.func(evt);
                 }
             });
         }, false);
@@ -842,7 +842,10 @@
     }
 
     // ショートカットのイベント設定
-    shortcut.add(window, GM_settings.ShortCutKey, launchPNBT);
+    shortcut.add(window, GM_settings.ShortCutKey, function(evt){
+        evt.preventDefault();
+        launchPNBT();
+    });
     GM_registerMenuCommand("Post to Twitter", function() {
         launchPNBT();
     })
