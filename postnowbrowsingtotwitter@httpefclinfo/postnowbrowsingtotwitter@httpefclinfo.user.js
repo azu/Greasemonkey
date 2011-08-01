@@ -525,16 +525,16 @@
             }, false)
             // フォーカスをinputFiledへ移す
             inputFiled.focus();
-            inputFiled.addEventListener("keypress", function(e) {
+            inputFiled.addEventListener("keypress", function(evt) {
                 var shortcutFlag = false;
                 if (GM_settings.PostWithCtrl) {// Enterでポスト
-                    var c = (e.ctrlKey);
-                    var v = (e.keyCode == 13);
+                    var c = (evt.ctrlKey || evt.metaKey);
+                    var v = (evt.keyCode == 13);
                     shortcutFlag = c && v;
                 } else {
-                    shortcutFlag = (e.keyCode == 13);
+                    shortcutFlag = (evt.keyCode == 13);
                 }
-                var esc = (e.keyCode == 27);
+                var esc = (evt.keyCode == 27);
                 if (shortcutFlag) {
                     this.removeEventListener("keypress", arguments.callee, false);
                     self.comment = inputFiled.value;
@@ -546,8 +546,8 @@
                     this.removeEventListener("keypress", arguments.callee, false);
                     document.body.removeChild(self.iframe);
                     focusBody();
-                } else if (e.keyCode == 9) {// TabキーでactivityFiledを有効化して移動
-                    e.preventDefault()
+                } else if (evt.keyCode == 9) {// TabキーでactivityFiledを有効化して移動
+                    evt.preventDefault()
                     activityFiled.setAttribute("contenteditable", "true");
                     activityFiled.focus();
                 }
